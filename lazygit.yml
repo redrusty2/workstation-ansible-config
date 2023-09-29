@@ -1,0 +1,49 @@
+---
+- hosts: localhost
+  become: yes  # to allow for sudo operations
+  tasks:
+
+    # Task to fetch the latest version of lazygit
+    - name: Get the latest lazygit version
+      ansible.builtin.uri:
+        url: https://api.github.com/repos/jesseduffield/lazygit/releases/latest
+        return_content: yes
+      register: lazygit_version_response
+      changed_when: false  # since this is just a query
+
+    # Task to extract the tag_name from the JSON response
+    - name: Extract lazygit version from JSON
+      ansible.builtin.set_fact:
+        lazygit_version: "{{ lazygit_version_response.json.tag_name }}"
+
+    # Task to download the lazygit archive
+    - name: Download lazygit archive
+      ansible.builtin.get_url:
+        url: "https://github.com/jesseduffield/lazygit/releases/download/{{ lazygit_version }}/lazygit_{{ lazygit_version | regex_replace('^v', '') }}_Linux_x86_64.tar.gz"
+        dest: "/tmp/lazygit.tar.gz"
+
+    # Task to extract lazygit binary from the tarball
+    - name: Extract lazygit archive
+      ansible.builtin.unarchive:
+        src: "/tmp/lazygit.tar.gz"
+        dest: "/tmp/"
+        remote_src: yes
+
+    # Task to move the lazygit binary to the desired location
+    - name: Move lazygit binary to /usr/local/bin
+      ansible.builtin.copy:
+        src: "/tmp/lazygit"
+        dest: "/usr/local/bin/lazygit"
+        mode: '0755'  # making it executable
+
+    # Task to verify the installed version of lazygit
+    - name: Check lazygit version
+      command: "lazygit --version"
+      register: installed_lazygit_version
+      changed_when: false  # since this is just a verification command
+
+    # Task to display the installed lazygit version
+    - name: Display installed lazygit version
+      ansible.builtin.debug:
+        msg: "Installed lazygit version: {{ installed_lazygit_version.stdout }}"
+

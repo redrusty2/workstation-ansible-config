@@ -1,8 +1,13 @@
 - hosts: localhost
   become: true
   tasks: 
-  - name: Install htop
-    apt: name=htop
+  - name: Install packages
+    apt: name={{item}}
+    with_items:
+      - tmux
+      - awesome
+      - fzf
+      - ripgrep
 
   - name: Download Google Chrome .deb
     get_url:
@@ -13,3 +18,12 @@
   - name: Install Google Chrome
     apt:
       deb: "/tmp/google-chrome-stable_current_amd64.deb"
+
+  - name: Ensure snapd is installed (this is the snap package manager)
+    apt:
+      name: snapd
+      state: present
+
+  - name: Install Spotify
+    snap:
+      name: spotify
