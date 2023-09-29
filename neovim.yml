@@ -1,0 +1,77 @@
+---
+- name: Install Neovim from source
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Install necessary dependencies
+      apt:
+        name:
+          - ninja-build
+          - gettext
+          - cmake
+          - unzip
+          - curl
+        state: present
+
+    - name: Clone Neovim from GitHub
+      git:
+        repo: 'https://github.com/neovim/neovim.git'
+        dest: '/tmp/neovim'
+        version: stable
+        depth: 1
+      register: git_clone_result
+      changed_when: false
+
+    - name: Get version from Neovim source
+      command:
+        cmd: "git describe --tags"
+        chdir: "/tmp/neovim"
+      register: repo_version
+      changed_when: false
+
+    - name: Get current installed Neovim version
+      command:
+        cmd: "nvim --version | head -n 1 | awk '{print $2}'"
+        _uses_shell: true
+      register: installed_version
+      failed_when: false
+      changed_when: false
+
+    - name: Debug repo_version
+      debug:
+        var: repo_version
+
+    - name: Debug installed_version
+      debug:
+        var: installed_version
+
+    - name: Compare versions and decide if building is necessary
+      set_fact:
+        should_build: "{{ repo_version.stdout != installed_version.stdout }}"
+
+    - name: Proceed with building and installing if versions differ
+      when: should_build
+      block:
+      - name: Build Neovim
+        command:
+          cmd: "{{ item }}"
+          chdir: "/tmp/neovim"
+        with_items:
+          - "make CMAKE_BUILD_TYPE=RelWithDebInfo"
+
+      - name: Create DEB package for Neovim
+        command:
+          cmd: "cpack -G DEB"
+          chdir: "/tmp/neovim/build"
+
+      - name: Install Neovim DEB package
+        apt:
+          deb: "/tmp/neovim/build/nvim-linux64.deb"
+          state: present
+
+      - name: Clone Neovim configuration from GitHub into ~/.config/nvim
+        git:
+          repo: "https://github.com/redrusty2/nvim-config.git"
+          dest: "/home/caleb/.config/nvim"
+          depth: 1
+          accept_hostkey: yes
