@@ -37,14 +37,6 @@
       failed_when: false
       changed_when: false
 
-    - name: Debug repo_version
-      debug:
-        var: repo_version
-
-    - name: Debug installed_version
-      debug:
-        var: installed_version
-
     - name: Compare versions and decide if building is necessary
       set_fact:
         should_build: "{{ repo_version.stdout != installed_version.stdout }}"
