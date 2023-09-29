@@ -3,3 +3,13 @@
   tasks: 
   - name: Install htop
     apt: name=htop
+
+  - name: Download Google Chrome .deb
+    get_url:
+      url: "https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb"
+      dest: "/tmp/google-chrome-stable_current_amd64.deb"
+      mode: '0775'
+
+  - name: Install Google Chrome
+    apt:
+      deb: "/tmp/google-chrome-stable_current_amd64.deb"
