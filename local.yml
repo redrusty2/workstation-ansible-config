@@ -8,6 +8,7 @@
       - awesome
       - fzf
       - ripgrep
+      - pavucontrol
 
   - name: Download Google Chrome .deb
     get_url:

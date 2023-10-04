@@ -1,0 +1,32 @@
+- hosts: localhost
+  become: true
+  vars:
+    email: redrusty12@gmail.com
+    github_username: redrusty2
+    key_title: ansible-home
+    repos:
+      - { repo: "awesomewm-config", dest: "/home/caleb/.config/awesome" }
+      - { repo: "lain", dest: "/home/caleb/.config/awesome/lain" }
+  tasks: 
+
+  - name: Clone Awesome configuration from GitHub into ~/.config/awesome
+    loop: "{{ repos }}"
+    loop_control: 
+      loop_var: item
+    git:
+      repo: "git@github.com:{{ github_username }}/{{ item.repo }}"
+      dest: "{{ item.dest }}"
+      depth: 1
+      accept_hostkey: yes
+      key_file: "/root/.ssh/id_gh_{{ item.repo }}"
+
+  - name: Update apt cache
+    apt: 
+      update_cache: yes
+
+  - name: Install packages
+    apt: name={{item}}
+    with_items:
+      - awesome
+      - rofi
+

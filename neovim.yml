@@ -11,6 +11,7 @@
           - cmake
           - unzip
           - curl
+          - xclip
         state: present
 
     - name: Clone Neovim from GitHub
@@ -61,9 +62,9 @@
           deb: "/tmp/neovim/build/nvim-linux64.deb"
           state: present
 
-      - name: Clone Neovim configuration from GitHub into ~/.config/nvim
-        git:
-          repo: "https://github.com/redrusty2/nvim-config.git"
-          dest: "/home/caleb/.config/nvim"
-          depth: 1
-          accept_hostkey: yes
+    - name: Clone Neovim configuration from GitHub into ~/.config/nvim
+      git:
+        repo: "https://github.com/redrusty2/nvim-config.git"
+        dest: "/home/caleb/.config/nvim"
+        depth: 1
+        accept_hostkey: yes
