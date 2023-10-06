@@ -1,5 +1,5 @@
 - hosts: localhost
-  become: true
+  become: no
   vars:
     email: redrusty12@gmail.com
     github_username: redrusty2
@@ -18,15 +18,18 @@
       dest: "{{ item.dest }}"
       depth: 1
       accept_hostkey: yes
-      key_file: "/root/.ssh/id_gh_{{ item.repo }}"
+      key_file: "$HOME/.ssh/id_gh_{{ item.repo }}"
 
   - name: Update apt cache
+    become: yes
     apt: 
       update_cache: yes
 
   - name: Install packages
+    become: yes
     apt: name={{item}}
     with_items:
       - awesome
       - rofi
+      - flameshot
 

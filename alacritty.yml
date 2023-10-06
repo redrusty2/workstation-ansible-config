@@ -1,0 +1,51 @@
+- include_tasks: rust.yml
+
+- name: Install alacritty deps
+  apt: name={{item}}
+  become: yes
+  with_items:
+    - cmake
+    - pkg-config
+    - libfreetype6-dev
+    - libfontconfig1-dev
+    - libxcb-xfixes0-dev
+    - libxkbcommon-dev
+    - python3
+
+- name: Checkout alacritty from GitHub
+  git:
+    repo: 'https://github.com/alacritty/alacritty.git'
+    dest: '/tmp/alacritty'
+    clone: yes
+    update: yes
+
+- name: Build alacritty
+  command:
+    cmd: '~/.cargo/bin/cargo build --release'
+    chdir: '/tmp/alacritty'
+  environment:
+    PATH: "{{ ansible_env.PATH }}:$HOME/.cargo/bin"
+
+- name: Check if alacritty terminfo exists
+  command:
+    cmd: infocmp alacritty
+    chdir: '/tmp/alacritty'
+  register: infocmp_result
+  ignore_errors: true
+
+- name: Install alacritty terminfo if missing
+  become: yes
+  command:
+    cmd: sudo tic -xe alacritty,alacritty-direct extra/alacritty.info
+    chdir: '/tmp/alacritty'
+  when: infocmp_result.failed
+
+- name: Copy alacritty binary to /usr/local/bin/
+  become: yes
+  copy:
+    src: /tmp/alacritty/target/release/alacritty
+    dest: /usr/local/bin/alacritty
+    owner: root
+    group: root
+    mode: '0755'
+    remote_src: yes

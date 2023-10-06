@@ -1,0 +1,68 @@
+- name: Install ZSH
+  apt: name=zsh
+  become: yes
+
+- name: Set ZSH as default shell
+  become: yes
+  user:
+    name: caleb
+    shell: /usr/bin/zsh
+
+- name: Check if Oh My Zsh has been installed
+  stat:
+    path: "{{ ansible_env.HOME }}/.oh-my-zsh"
+  register: ohmyzsh_stat
+
+- name: Install Oh My Zsh
+  when: not ohmyzsh_stat.stat.exists
+  block:
+  - name: Fetch the Oh My Zsh installation script
+    uri:
+      url: "https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh"
+      dest: "/tmp/install_ohmyzsh.sh"
+      mode: '0755'
+      return_content: no
+      force_basic_auth: yes
+
+  - name: Run the Oh My Zsh installation script
+    shell: "/tmp/install_ohmyzsh.sh"
+
+  - name: Remove the Oh My Zsh installation script
+    file:
+      path: "/tmp/install_ohmyzsh.sh"
+      state: absent
+
+- name: Check if zshrc.pre-oh-my-zsh exists
+  stat:
+    path: "{{ ansible_env.HOME }}/.zshrc.pre-oh-my-zsh"
+  register: zshrc_stat
+
+- name: Move zshrc.pre-oh-my-zsh to .zshrc if it exists
+  command:
+    cmd: mv "{{ ansible_env.HOME }}/.zshrc.pre-oh-my-zsh" "{{ ansible_env.HOME }}/.zshrc"
+  when: zshrc_stat.stat.exists
+  become: no
+
+- name: Clone zsh-autosuggestions repository
+  ansible.builtin.git:
+    repo: 'https://github.com/zsh-users/zsh-autosuggestions.git'
+    dest: "{{ ansible_env.HOME }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
+    clone: yes
+    update: yes
+  become: no
+
+- name: Clone zsh-syntax-highlighting repository
+  ansible.builtin.git:
+    repo: 'https://github.com/zsh-users/zsh-syntax-highlighting.git'
+    dest: "{{ ansible_env.HOME }}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
+    clone: yes
+    update: yes
+  become: no
+
+- name: Clone PowerLevel10K repository
+  ansible.builtin.git:
+    repo: 'https://github.com/romkatv/powerlevel10k.git'
+    dest: "{{ ansible_env.HOME }}/.oh-my-zsh/custom/themes/powerlevel10k"
+    clone: yes
+    update: yes
+  become: no

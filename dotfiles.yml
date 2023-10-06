@@ -1,0 +1,40 @@
+---
+- hosts: localhost
+  become: no
+  vars: 
+    config_alias: "/usr/bin/git --git-dir=$HOME/.cfg/ --work-tree=$HOME"
+  tasks:
+    - name: Add git alias for dotfiles
+      lineinfile:
+        path: "{{ ansible_env.HOME }}/.bashrc"  
+        line: "alias config='{{ config_alias }}'"
+
+    - name: Clone dotfiles repo
+      git:
+        repo: "git@github.com:redrusty2/.dotfiles.git"
+        dest: "{{ ansible_env.HOME }}/.cfg"
+        depth: 1
+        accept_hostkey: yes
+        bare: yes
+        update: no  
+        key_file: "$HOME/.ssh/id_gh_.dotfiles"
+
+    - name: Check out the dotfiles repo
+      shell: "{{ config_alias }} checkout"  
+      become: no
+      ignore_errors: yes 
+
+    - name: Avoid showing untracked files
+      shell: "{{ config_alias }} config --local status.showUntrackedFiles no"
+      ignore_errors: yes  
+
+    - name: Clone tpm repository for tmux
+      ansible.builtin.git:
+        repo: 'https://github.com/tmux-plugins/tpm.git'
+        dest: "{{ ansible_env.HOME }}/.tmux/plugins/tpm"
+        clone: yes
+        update: yes
+
+    - include_tasks: alacritty.yml
+
+    - include_tasks: zsh.yml

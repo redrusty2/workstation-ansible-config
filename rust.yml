@@ -1,0 +1,27 @@
+- name: Fetch the rustup installation script
+  ansible.builtin.uri:
+    url: https://sh.rustup.rs
+    method: GET
+    return_content: yes
+    dest: "/tmp/rustup_install.sh"
+    validate_certs: yes
+    headers:
+      User-Agent: "ansible"
+    status_code:
+      - 200
+      - 304
+  register: rustup_script
+
+- name: Make the rustup script executable
+  ansible.builtin.file:
+    path: "/tmp/rustup_install.sh"
+    mode: '0755'
+
+- name: Execute the rustup installation script
+  ansible.builtin.shell: "/tmp/rustup_install.sh -y"
+  # become: yes  # Optionally run as sudo if required
+
+- name: Remove the rustup script from temp after installation
+  ansible.builtin.file:
+    path: "/tmp/rustup_install.sh"
+    state: absent
