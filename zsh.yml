@@ -1,6 +1,9 @@
 - name: Install ZSH
-  apt: name=zsh
+  apt: name={{item}}
   become: yes
+  with_items:
+    - zsh
+    - bat
 
 - name: Set ZSH as default shell
   become: yes

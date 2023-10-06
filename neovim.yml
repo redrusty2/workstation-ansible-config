@@ -1,9 +1,9 @@
 ---
 - name: Install Neovim from source
   hosts: localhost
-  become: yes
   tasks:
     - name: Install necessary dependencies
+      become: yes
       apt:
         name:
           - ninja-build
@@ -58,6 +58,7 @@
           chdir: "/tmp/neovim/build"
 
       - name: Install Neovim DEB package
+        become: yes
         apt:
           deb: "/tmp/neovim/build/nvim-linux64.deb"
           state: present
