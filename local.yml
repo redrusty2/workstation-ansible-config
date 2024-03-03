@@ -9,6 +9,7 @@
       - fzf
       - ripgrep
       - pavucontrol
+      - playerctl
 
   - name: Download Google Chrome .deb
     get_url:
