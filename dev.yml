@@ -1,0 +1,19 @@
+- hosts: localhost
+  become: no
+  vars:
+    key_title: ansible-home
+  tasks: 
+
+  - name: Update apt cache
+    become: yes
+    apt: 
+      update_cache: yes
+
+  - name: Install packages
+    become: yes
+    apt: name={{item}}
+    with_items:
+      - awesome
+      - rofi
+      - flameshot
+

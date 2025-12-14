@@ -38,3 +38,5 @@
     - include_tasks: alacritty.yml
 
     - include_tasks: zsh.yml
+
+    - include_tasks: lazygit.yml

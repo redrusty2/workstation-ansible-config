@@ -60,7 +60,7 @@
       - name: Install Neovim DEB package
         become: yes
         apt:
-          deb: "/tmp/neovim/build/nvim-linux64.deb"
+          deb: "/tmp/neovim/build/nvim-linux-x86_64.deb"
           state: present
 
     - name: Clone Neovim configuration from GitHub into ~/.config/nvim

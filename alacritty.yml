@@ -49,3 +49,33 @@
     group: root
     mode: '0755'
     remote_src: yes
+
+- name: Create Alacritty desktop entry
+  copy:
+    dest: /usr/share/applications/alacritty.desktop
+    content: |
+      [Desktop Entry]
+      Type=Application
+      Name=Alacritty
+      Comment=A fast, cross-platform, OpenGL terminal emulator
+      Exec=alacritty
+      Icon=alacritty
+      Terminal=false
+      Categories=System;TerminalEmulator;
+      StartupWMClass=Alacritty
+    mode: '0644'
+    owner: root
+    group: root
+  become: yes
+
+- name: Update desktop database
+  command: update-desktop-database
+  become: yes
+  changed_when: false
+
+- name: Download Alacritty icon
+  get_url:
+    url: https://raw.githubusercontent.com/alacritty/alacritty/master/extra/logo/alacritty-term.svg
+    dest: /usr/share/pixmaps/alacritty.svg
+    mode: '0644'
+  become: yes
